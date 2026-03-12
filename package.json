@@ -1,6 +1,6 @@
 {
   "name": "@jpabbuehl/stratum",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Planning and orchestration layer for agentic software development",
   "bin": {
     "stratum": "bin/install.js"

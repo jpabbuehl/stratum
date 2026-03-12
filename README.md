@@ -4,9 +4,17 @@ Stratum is a planning and orchestration layer for agentic software development.
 
 It is designed to be complementary to execution systems such as get-shit-done rather than replacing them. Stratum keeps canonical planning artifacts in `.planning/`, then exports adapter views for downstream workflows.
 
+The default planning posture is:
+
+- `--deep --dual`
+- Claude as canonical writer
+- Codex as secondary planner and critic
+- persisted deliberation state under `DELIBERATION/`
+
 Current adapter support:
 
 - get-shit-done
+- beads
 
 Intended compatibility:
 
@@ -105,8 +113,38 @@ For supported runtimes, Stratum installs:
 
 - `/stratum:help`
 - `/stratum:init-solution`
+- `/stratum:discuss-phase <phase-ref|--next>`
 - `/stratum:plan-phase <phase-ref|--next>`
+- `/stratum:challenge-plan <phase-ref|--path <plan-path>>`
+- `/stratum:phase-status <phase-ref|--next>`
 - `/stratum:export-gsd <phase-ref|--next>`
+- `/stratum:export-beads <phase-ref|--next>`
+- `/stratum:doctor`
+
+## Planning Modes
+
+Stratum supports the mode matrix from the original dual-planning design:
+
+- `--quick --single`
+  - one planner pass
+  - light validation
+- `--quick --dual`
+  - Claude plus Codex
+  - light merge path
+- `--deep --single`
+  - one planner with stronger QA
+- `--deep --dual`
+  - default
+  - independent secondary plan/critique
+  - challenge/defense oriented deliberation
+  - persisted synthesis buckets
+
+The backend stores deliberation artifacts in:
+
+- `.planning/phases/<nn>-<slug>/DELIBERATION/packet.json`
+- `.planning/phases/<nn>-<slug>/DELIBERATION/topology.json`
+- `.planning/phases/<nn>-<slug>/DELIBERATION/codex-independent.md`
+- `.planning/phases/<nn>-<slug>/DELIBERATION/synthesis.json`
 
 ## Canonical Model
 
@@ -123,19 +161,38 @@ Canonical artifacts:
 Adapter outputs are generated under:
 
 - `.planning/adapters/gsd/`
+- `.planning/adapters/beads/`
 
 ## Example
 
 Initialize planning:
 
 ```bash
-node ~/.claude/stratum/bin/stratum-tools.cjs init-solution
+node ~/.claude/stratum/bin/stratum-tools.cjs init-solution --deep --dual
+```
+
+Discuss a phase before planning:
+
+```bash
+node ~/.claude/stratum/bin/stratum-tools.cjs discuss-phase --next
 ```
 
 Plan a feature:
 
 ```bash
-node ~/.claude/stratum/bin/stratum-tools.cjs plan-phase --next
+node ~/.claude/stratum/bin/stratum-tools.cjs plan-phase --next --deep --dual
+```
+
+Challenge an existing plan:
+
+```bash
+node ~/.claude/stratum/bin/stratum-tools.cjs challenge-plan --next --deep --dual
+```
+
+Check phase readiness:
+
+```bash
+node ~/.claude/stratum/bin/stratum-tools.cjs phase-status --next
 ```
 
 Export for get-shit-done:
@@ -143,6 +200,36 @@ Export for get-shit-done:
 ```bash
 node ~/.claude/stratum/bin/stratum-tools.cjs export-gsd --next
 ```
+
+Export for beads:
+
+```bash
+node ~/.claude/stratum/bin/stratum-tools.cjs export-beads --next
+```
+
+Doctor the local setup:
+
+```bash
+node ~/.claude/stratum/bin/stratum-tools.cjs doctor
+```
+
+## Dual Planning Notes
+
+Stratum deliberately does not depend on Owlex MCP.
+
+It does reuse the useful parts of the original design:
+
+- topology-driven planning modes
+- secondary planner delegation to Codex CLI
+- persisted deliberation artifacts
+- synthesis buckets such as agreed, dismissed, and unresolved
+- adapter-first exports that do not take ownership away from canonical `.planning/` artifacts
+
+The package includes a local Codex wrapper at:
+
+- `stratum/wrappers/codex-wrapper.sh`
+
+That wrapper is used by the deterministic backend when dual mode is enabled and Codex is available.
 
 ## Publish
 

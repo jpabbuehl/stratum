@@ -160,6 +160,14 @@ function installRuntime(runtime, srcRoot) {
 
   copyDir(stratumSrc, stratumDest);
   copyDir(adaptersSrc, path.join(stratumDest, 'adapters'));
+  for (const executablePath of [
+    path.join(stratumDest, 'bin', 'stratum-tools.cjs'),
+    path.join(stratumDest, 'wrappers', 'codex-wrapper.sh')
+  ]) {
+    if (fs.existsSync(executablePath)) {
+      fs.chmodSync(executablePath, 0o755);
+    }
+  }
 
   if (runtime === 'codex') {
     installCodexSkills(commandsSrc, path.join(targetDir, 'skills'), 'stratum', runtimeRoot);
