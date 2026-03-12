@@ -22,9 +22,7 @@ function getRuntimeFlags() {
   const runtimes = [];
   if (args.includes('--claude')) runtimes.push('claude');
   if (args.includes('--codex')) runtimes.push('codex');
-  if (args.includes('--gemini')) runtimes.push('gemini');
-  if (args.includes('--opencode')) runtimes.push('opencode');
-  if (args.includes('--all')) return ['claude', 'codex', 'gemini', 'opencode'];
+  if (args.includes('--all')) return ['claude', 'codex'];
   return runtimes;
 }
 
@@ -39,9 +37,7 @@ Options:
   --local, -l       Install to current project
   --claude          Install for Claude Code
   --codex           Install for Codex
-  --gemini          Install for Gemini CLI
-  --opencode        Install for OpenCode
-  --all             Install for all supported runtimes
+  --all             Install for Claude Code and Codex
   --uninstall, -u   Remove Stratum from selected runtimes
   --help, -h        Show help
 `);
@@ -127,15 +123,11 @@ function getTargetDir(runtime) {
   if (isLocal) {
     const dirMap = {
       claude: '.claude',
-      codex: '.codex',
-      gemini: '.gemini',
-      opencode: '.opencode'
+      codex: '.codex'
     };
     return path.join(process.cwd(), dirMap[runtime]);
   }
   if (runtime === 'codex') return process.env.CODEX_HOME || path.join(os.homedir(), '.codex');
-  if (runtime === 'gemini') return process.env.GEMINI_CONFIG_DIR || path.join(os.homedir(), '.gemini');
-  if (runtime === 'opencode') return process.env.OPENCODE_CONFIG_DIR || path.join(os.homedir(), '.config', 'opencode');
   return process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
 }
 
@@ -143,14 +135,10 @@ function uninstallRuntime(runtime) {
   const targetDir = getTargetDir(runtime);
   if (runtime === 'codex') {
     fs.rmSync(path.join(targetDir, 'skills', 'stratum-help'), { recursive: true, force: true });
-    for (const entry of fs.readdirSync(path.join(targetDir, 'skills'), { withFileTypes: true }).filter(entry => entry.isDirectory() && entry.name.startsWith('stratum-'))) {
-      fs.rmSync(path.join(targetDir, 'skills', entry.name), { recursive: true, force: true });
-    }
-  } else if (runtime === 'opencode') {
-    const commandDir = path.join(targetDir, 'command');
-    if (fs.existsSync(commandDir)) {
-      for (const file of fs.readdirSync(commandDir)) {
-        if (file.startsWith('stratum-')) fs.rmSync(path.join(commandDir, file), { force: true });
+    const skillsDir = path.join(targetDir, 'skills');
+    if (fs.existsSync(skillsDir)) {
+      for (const entry of fs.readdirSync(skillsDir, { withFileTypes: true }).filter(entry => entry.isDirectory() && entry.name.startsWith('stratum-'))) {
+        fs.rmSync(path.join(skillsDir, entry.name), { recursive: true, force: true });
       }
     }
   } else {
@@ -175,8 +163,6 @@ function installRuntime(runtime, srcRoot) {
 
   if (runtime === 'codex') {
     installCodexSkills(commandsSrc, path.join(targetDir, 'skills'), 'stratum', runtimeRoot);
-  } else if (runtime === 'opencode') {
-    installFlattenedCommands(commandsSrc, path.join(targetDir, 'command'), 'stratum', runtimeRoot);
   } else {
     installNestedCommands(commandsSrc, path.join(targetDir, 'commands', 'stratum'), runtimeRoot);
   }
@@ -201,15 +187,15 @@ async function main() {
   const srcRoot = path.join(__dirname, '..');
   let runtimes = getRuntimeFlags();
   if (runtimes.length === 0) {
-    const answer = await ask('Install for which runtime? [claude/codex/gemini/opencode/all] ');
-    runtimes = answer === 'all' ? ['claude', 'codex', 'gemini', 'opencode'] : [answer || 'claude'];
+    const answer = await ask('Install for which runtime layout? [claude/codex/all] ');
+    runtimes = answer === 'all' ? ['claude', 'codex'] : [answer || 'claude'];
   }
 
   console.log(`${cyan}Stratum${reset} v${pkg.version}`);
   console.log(`Mode: ${isGlobal ? 'global' : 'local'}`);
 
   for (const runtime of runtimes) {
-    if (!['claude', 'codex', 'gemini', 'opencode'].includes(runtime)) {
+    if (!['claude', 'codex'].includes(runtime)) {
       console.log(`${yellow}Skipping unknown runtime:${reset} ${runtime}`);
       continue;
     }
