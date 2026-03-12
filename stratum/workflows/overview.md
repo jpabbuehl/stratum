@@ -15,7 +15,14 @@ Mode matrix:
 - `deep + single`
 - `deep + dual`
 
-Dual mode keeps Claude as canonical writer and uses Codex as a secondary planner or critic through a local wrapper-based delegation path.
+Topology presets:
+
+- `dual-argumentation`
+- `council`
+- `round-robin`
+- `critique`
+
+Dual mode keeps Claude as canonical writer and uses wrapper-driven delegates (`claude`, `codex`, optional `gemini`) through a local shell-script delegation path rather than Owlex MCP.
 
 Current adapter support:
 

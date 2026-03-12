@@ -1,7 +1,7 @@
 ---
 name: stratum:init-solution
 description: Initialize canonical planning artifacts under .planning/
-argument-hint: "[--single|--dual] [--quick|--deep]"
+argument-hint: "[--single|--dual] [--quick|--deep] [--topology <preset>] [--vendors claude,codex,gemini]"
 allowed-tools:
   - Read
   - Write

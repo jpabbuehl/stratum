@@ -162,7 +162,9 @@ function installRuntime(runtime, srcRoot) {
   copyDir(adaptersSrc, path.join(stratumDest, 'adapters'));
   for (const executablePath of [
     path.join(stratumDest, 'bin', 'stratum-tools.cjs'),
-    path.join(stratumDest, 'wrappers', 'codex-wrapper.sh')
+    path.join(stratumDest, 'wrappers', 'codex-wrapper.sh'),
+    path.join(stratumDest, 'wrappers', 'claude-wrapper.sh'),
+    path.join(stratumDest, 'wrappers', 'gemini-wrapper.sh')
   ]) {
     if (fs.existsSync(executablePath)) {
       fs.chmodSync(executablePath, 0o755);

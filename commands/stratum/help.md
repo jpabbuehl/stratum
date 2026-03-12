@@ -26,4 +26,12 @@ Orient the user to Stratum as a planning/orchestration layer with canonical `.pl
    - `--quick --dual`
    - `--deep --single`
    - `--deep --dual` (default)
+5. Explain topology presets:
+   - `dual-argumentation`
+   - `council`
+   - `round-robin`
+   - `critique`
+6. Explain vendor delegation:
+   - wrapper scripts under `~/.claude/stratum/wrappers/`
+   - typical delegates are `claude`, `codex`, and optional `gemini`
 </process>

@@ -8,7 +8,7 @@ The default planning posture is:
 
 - `--deep --dual`
 - Claude as canonical writer
-- Codex as secondary planner and critic
+- wrapper-driven delegates for `claude` and `codex`
 - persisted deliberation state under `DELIBERATION/`
 
 Current adapter support:
@@ -114,8 +114,8 @@ For supported runtimes, Stratum installs:
 - `/stratum:help`
 - `/stratum:init-solution`
 - `/stratum:discuss-phase <phase-ref|--next>`
-- `/stratum:plan-phase <phase-ref|--next>`
-- `/stratum:challenge-plan <phase-ref|--path <plan-path>>`
+- `/stratum:plan-phase <phase-ref|--next> [--topology <preset>] [--vendors claude,codex,gemini]`
+- `/stratum:challenge-plan <phase-ref|--path <plan-path>> [--topology <preset>] [--vendors claude,codex,gemini]`
 - `/stratum:phase-status <phase-ref|--next>`
 - `/stratum:export-gsd <phase-ref|--next>`
 - `/stratum:export-beads <phase-ref|--next>`
@@ -129,22 +129,31 @@ Stratum supports the mode matrix from the original dual-planning design:
   - one planner pass
   - light validation
 - `--quick --dual`
-  - Claude plus Codex
+  - wrapper-driven dual consultation
   - light merge path
 - `--deep --single`
   - one planner with stronger QA
 - `--deep --dual`
   - default
-  - independent secondary plan/critique
+  - independent multi-vendor rounds before synthesis
   - challenge/defense oriented deliberation
   - persisted synthesis buckets
+
+Topology presets:
+
+- `dual-argumentation`
+- `council`
+- `round-robin`
+- `critique`
 
 The backend stores deliberation artifacts in:
 
 - `.planning/phases/<nn>-<slug>/DELIBERATION/packet.json`
 - `.planning/phases/<nn>-<slug>/DELIBERATION/topology.json`
-- `.planning/phases/<nn>-<slug>/DELIBERATION/codex-independent.md`
+- `.planning/phases/<nn>-<slug>/DELIBERATION/round-1/*.md`
+- `.planning/phases/<nn>-<slug>/DELIBERATION/round-2/*.md`
 - `.planning/phases/<nn>-<slug>/DELIBERATION/synthesis.json`
+- `.planning/phases/<nn>-<slug>/DELIBERATION/sessions.json`
 
 ## Canonical Model
 
@@ -181,6 +190,18 @@ Plan a feature:
 
 ```bash
 node ~/.claude/stratum/bin/stratum-tools.cjs plan-phase --next --deep --dual
+```
+
+Run a three-vendor council:
+
+```bash
+node ~/.claude/stratum/bin/stratum-tools.cjs plan-phase --next --deep --dual --topology council --vendors claude,codex,gemini
+```
+
+Run a serial round-robin:
+
+```bash
+node ~/.claude/stratum/bin/stratum-tools.cjs plan-phase --next --deep --dual --topology round-robin --vendors claude,codex,gemini
 ```
 
 Challenge an existing plan:
@@ -220,16 +241,20 @@ Stratum deliberately does not depend on Owlex MCP.
 It does reuse the useful parts of the original design:
 
 - topology-driven planning modes
-- secondary planner delegation to Codex CLI
+- wrapper-driven delegation to external vendor CLIs
 - persisted deliberation artifacts
+- independent first-pass responses
+- critique/revision rounds before synthesis
 - synthesis buckets such as agreed, dismissed, and unresolved
 - adapter-first exports that do not take ownership away from canonical `.planning/` artifacts
 
-The package includes a local Codex wrapper at:
+The package includes local wrappers at:
 
+- `stratum/wrappers/claude-wrapper.sh`
 - `stratum/wrappers/codex-wrapper.sh`
+- `stratum/wrappers/gemini-wrapper.sh`
 
-That wrapper is used by the deterministic backend when dual mode is enabled and Codex is available.
+Those wrappers are used by the deterministic backend when vendor delegation is enabled.
 
 ## Publish
 
