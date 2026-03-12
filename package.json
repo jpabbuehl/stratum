@@ -1,0 +1,40 @@
+{
+  "name": "@jpabbuehl/stratum",
+  "version": "0.1.0",
+  "description": "Planning and orchestration layer for agentic software development",
+  "bin": {
+    "stratum": "bin/install.js"
+  },
+  "files": [
+    "bin",
+    "commands",
+    "stratum",
+    "adapters",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "claude-code",
+    "codex",
+    "planning",
+    "orchestration",
+    "agentic-development",
+    "workflow"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jpabbuehl/stratum.git"
+  },
+  "homepage": "https://github.com/jpabbuehl/stratum",
+  "bugs": {
+    "url": "https://github.com/jpabbuehl/stratum/issues"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.cjs",
+    "pack:check": "npm pack --dry-run"
+  }
+}
